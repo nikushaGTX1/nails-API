@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.OpenApi;
 using NailsApi.Data;
 using NailsApi.Services;
@@ -8,7 +9,9 @@ var connectionString=builder.Configuration.GetConnectionString("DefaultConnectio
     ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection is required.");
 
 builder.Services.AddControllers();
-builder.Services.AddDbContext<NailsDbContext>(options => options.UseNpgsql(connectionString));
+builder.Services.AddDbContext<NailsDbContext>(options => options.UseNpgsql(
+    connectionString,
+    npgsql => npgsql.ConfigureDataSource(dataSource => dataSource.EnableDynamicJson())));
 builder.Services.AddScoped<IContentService,ContentService>();
 builder.Services.AddScoped<AdminCredentialService>();
 builder.Services.AddSingleton<AdminSessionService>();
@@ -28,6 +31,8 @@ var app=builder.Build();
 
 app.UseExceptionHandler(error => error.Run(async context =>
 {
+    var exception=context.Features.Get<IExceptionHandlerFeature>()?.Error;
+    app.Logger.LogError(exception,"Unhandled exception while processing {Method} {Path}",context.Request.Method,context.Request.Path);
     context.Response.StatusCode=StatusCodes.Status500InternalServerError;
     context.Response.ContentType="application/problem+json";
     await Results.Problem("The server could not complete the request.",statusCode:500).ExecuteAsync(context);
