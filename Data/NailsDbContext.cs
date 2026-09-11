@@ -12,6 +12,7 @@ public sealed class NailsDbContext(DbContextOptions<NailsDbContext> options) : D
     public DbSet<LocationEntity> Locations => Set<LocationEntity>();
     public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
     public DbSet<SiteState> SiteStates => Set<SiteState>();
+    public DbSet<BookingEntity> Bookings => Set<BookingEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

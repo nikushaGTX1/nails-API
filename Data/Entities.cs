@@ -53,3 +53,15 @@ public sealed class SiteState
     public int Id { get; set; } = 1;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
+
+public sealed class BookingEntity
+{
+    public long Id { get; set; }
+    public string Name { get; set; } = "";
+    public string Phone { get; set; } = "";
+    public string Studio { get; set; } = "";
+    public string Service { get; set; } = "";
+    public DateOnly Date { get; set; }
+    public TimeOnly Time { get; set; }
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+}
