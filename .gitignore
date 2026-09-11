@@ -1,0 +1,16 @@
+# .NET build output
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+
+# Per-user IDE settings
+*.csproj.user
+*.suo
+.vs/
+
+# Local development files
+appsettings.Local.json
+
+# Operating system files
+.DS_Store
+Thumbs.db
