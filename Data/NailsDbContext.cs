@@ -23,6 +23,11 @@ public sealed class NailsDbContext(DbContextOptions<NailsDbContext> options) : D
         modelBuilder.Entity<GalleryItemEntity>().Property(x => x.Title).HasColumnType("jsonb");
         modelBuilder.Entity<LocationEntity>().Property(x => x.Address).HasColumnType("jsonb");
         modelBuilder.Entity<ServiceEntity>().Property(x => x.Price).HasPrecision(10, 2);
-        modelBuilder.Entity<SiteState>().HasData(new SiteState { Id = 1 });
+        modelBuilder.Entity<SiteState>().HasData(new SiteState
+        {
+            Id = 1,
+            // Seed data must be deterministic so EF can compare it with the migration snapshot.
+            UpdatedAt = new DateTimeOffset(2026, 9, 10, 20, 21, 20, 765, TimeSpan.Zero).AddTicks(3357)
+        });
     }
 }
