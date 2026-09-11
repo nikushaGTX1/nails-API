@@ -45,7 +45,9 @@ public sealed class BookingDto
     public long Id { get; set; }
     public string Name { get; set; } = "";
     public string Phone { get; set; } = "";
+    public string StudioId { get; set; } = "";
     public string Studio { get; set; } = "";
+    public string ServiceId { get; set; } = "";
     public string Service { get; set; } = "";
     public DateOnly Date { get; set; }
     public TimeOnly Time { get; set; }
@@ -56,7 +58,9 @@ public sealed class CreateBookingRequest
 {
     public string Name { get; set; } = "";
     public string Phone { get; set; } = "";
+    public string StudioId { get; set; } = "";
     public string Studio { get; set; } = "";
+    public string ServiceId { get; set; } = "";
     public string Service { get; set; } = "";
     public DateOnly Date { get; set; }
     public TimeOnly Time { get; set; }

@@ -13,7 +13,8 @@ public sealed class BookingsController(NailsDbContext db, AdminSessionService se
     public async Task<ActionResult<BookingDto>> Create(CreateBookingRequest request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.Name) || string.IsNullOrWhiteSpace(request.Phone) ||
-            string.IsNullOrWhiteSpace(request.Studio) || string.IsNullOrWhiteSpace(request.Service) ||
+            string.IsNullOrWhiteSpace(request.StudioId) || string.IsNullOrWhiteSpace(request.Studio) ||
+            string.IsNullOrWhiteSpace(request.ServiceId) || string.IsNullOrWhiteSpace(request.Service) ||
             request.Date == default || request.Time == default)
             return BadRequest(new { message = "Complete every booking field." });
 
@@ -28,7 +29,9 @@ public sealed class BookingsController(NailsDbContext db, AdminSessionService se
         {
             Name = request.Name.Trim(),
             Phone = request.Phone.Trim(),
+            StudioId = request.StudioId.Trim(),
             Studio = request.Studio.Trim(),
+            ServiceId = request.ServiceId.Trim(),
             Service = request.Service.Trim(),
             Date = request.Date,
             Time = request.Time
@@ -46,14 +49,24 @@ public sealed class BookingsController(NailsDbContext db, AdminSessionService se
             .OrderByDescending(x => x.Date).ThenByDescending(x => x.Time)
             .Select(x => new BookingDto
             {
-                Id = x.Id, Name = x.Name, Phone = x.Phone, Studio = x.Studio,
-                Service = x.Service, Date = x.Date, Time = x.Time, CreatedAt = x.CreatedAt
+                Id = x.Id, Name = x.Name, Phone = x.Phone, StudioId = x.StudioId,
+                Studio = x.Studio, ServiceId = x.ServiceId, Service = x.Service,
+                Date = x.Date, Time = x.Time, CreatedAt = x.CreatedAt
             }).ToListAsync(cancellationToken));
+    }
+
+    [HttpDelete("api/admin/bookings/{id:long}")]
+    public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
+    {
+        if (!sessions.IsValid(Request)) return Unauthorized();
+        var deleted = await db.Bookings.Where(x => x.Id == id).ExecuteDeleteAsync(cancellationToken);
+        return deleted == 0 ? NotFound() : NoContent();
     }
 
     private static BookingDto ToDto(BookingEntity x) => new()
     {
-        Id = x.Id, Name = x.Name, Phone = x.Phone, Studio = x.Studio,
-        Service = x.Service, Date = x.Date, Time = x.Time, CreatedAt = x.CreatedAt
+        Id = x.Id, Name = x.Name, Phone = x.Phone, StudioId = x.StudioId,
+        Studio = x.Studio, ServiceId = x.ServiceId, Service = x.Service,
+        Date = x.Date, Time = x.Time, CreatedAt = x.CreatedAt
     };
 }
