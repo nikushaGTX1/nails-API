@@ -51,8 +51,20 @@ public sealed class BookingsController(NailsDbContext db, AdminSessionService se
             {
                 Id = x.Id, Name = x.Name, Phone = x.Phone, StudioId = x.StudioId,
                 Studio = x.Studio, ServiceId = x.ServiceId, Service = x.Service,
-                Date = x.Date, Time = x.Time, CreatedAt = x.CreatedAt
+                Date = x.Date, Time = x.Time, Status = x.Status, CreatedAt = x.CreatedAt
             }).ToListAsync(cancellationToken));
+    }
+
+    [HttpPut("api/admin/bookings/{id:long}/status")]
+    public async Task<IActionResult> UpdateStatus(long id, UpdateBookingStatusRequest request, CancellationToken cancellationToken)
+    {
+        if (!sessions.IsValid(Request)) return Unauthorized();
+        var status = request.Status?.Trim().ToLowerInvariant();
+        if (status is not ("new" or "confirmed" or "completed" or "cancelled"))
+            return BadRequest(new { message = "Invalid booking status." });
+        var updated = await db.Bookings.Where(x => x.Id == id)
+            .ExecuteUpdateAsync(x => x.SetProperty(b => b.Status, status), cancellationToken);
+        return updated == 0 ? NotFound() : NoContent();
     }
 
     [HttpDelete("api/admin/bookings/{id:long}")]
@@ -67,6 +79,6 @@ public sealed class BookingsController(NailsDbContext db, AdminSessionService se
     {
         Id = x.Id, Name = x.Name, Phone = x.Phone, StudioId = x.StudioId,
         Studio = x.Studio, ServiceId = x.ServiceId, Service = x.Service,
-        Date = x.Date, Time = x.Time, CreatedAt = x.CreatedAt
+        Date = x.Date, Time = x.Time, Status = x.Status, CreatedAt = x.CreatedAt
     };
 }

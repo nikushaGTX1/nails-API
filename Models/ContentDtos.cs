@@ -51,6 +51,7 @@ public sealed class BookingDto
     public string Service { get; set; } = "";
     public DateOnly Date { get; set; }
     public TimeOnly Time { get; set; }
+    public string Status { get; set; } = "new";
     public DateTimeOffset CreatedAt { get; set; }
 }
 
@@ -65,3 +66,5 @@ public sealed class CreateBookingRequest
     public DateOnly Date { get; set; }
     public TimeOnly Time { get; set; }
 }
+
+public sealed record UpdateBookingStatusRequest(string? Status);
