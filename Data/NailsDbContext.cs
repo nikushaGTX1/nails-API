@@ -10,6 +10,7 @@ public sealed class NailsDbContext(DbContextOptions<NailsDbContext> options) : D
     public DbSet<ServiceEntity> Services => Set<ServiceEntity>();
     public DbSet<GalleryItemEntity> GalleryItems => Set<GalleryItemEntity>();
     public DbSet<LocationEntity> Locations => Set<LocationEntity>();
+    public DbSet<CategoryEntity> Categories => Set<CategoryEntity>();
     public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
     public DbSet<SiteState> SiteStates => Set<SiteState>();
     public DbSet<BookingEntity> Bookings => Set<BookingEntity>();
@@ -21,8 +22,11 @@ public sealed class NailsDbContext(DbContextOptions<NailsDbContext> options) : D
         modelBuilder.Entity<SiteMedia>().HasKey(x => x.Key);
         modelBuilder.Entity<ServiceEntity>().Property(x => x.Name).HasColumnType("jsonb");
         modelBuilder.Entity<ServiceEntity>().Property(x => x.Description).HasColumnType("jsonb");
+        modelBuilder.Entity<ServiceEntity>().Property(x => x.GroupLabel).HasColumnType("jsonb");
+        modelBuilder.Entity<ServiceEntity>().Property(x => x.SubgroupLabel).HasColumnType("jsonb");
         modelBuilder.Entity<GalleryItemEntity>().Property(x => x.Title).HasColumnType("jsonb");
         modelBuilder.Entity<LocationEntity>().Property(x => x.Address).HasColumnType("jsonb");
+        modelBuilder.Entity<CategoryEntity>().Property(x => x.Name).HasColumnType("jsonb");
         modelBuilder.Entity<ServiceEntity>().Property(x => x.Price).HasPrecision(10, 2);
         modelBuilder.Entity<SiteState>().HasData(new SiteState
         {

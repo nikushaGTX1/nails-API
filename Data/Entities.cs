@@ -17,6 +17,20 @@ public sealed class ServiceEntity
     public Dictionary<string, string> Description { get; set; } = [];
     public decimal Price { get; set; }
     public int SortOrder { get; set; }
+    /// <summary>Empty = shown in the flat homepage service list. Set = grouped under a CategoryEntity's accordion page.</summary>
+    public string CategoryId { get; set; } = "";
+    /// <summary>Top-level accordion group within a category, e.g. "Маникюр" / "Пилочный".</summary>
+    public Dictionary<string, string> GroupLabel { get; set; } = [];
+    /// <summary>Expandable row label within a group, e.g. "С покрытием".</summary>
+    public Dictionary<string, string> SubgroupLabel { get; set; } = [];
+}
+
+public sealed class CategoryEntity
+{
+    public string Id { get; set; } = "";
+    public Dictionary<string, string> Name { get; set; } = [];
+    public string ImageUrl { get; set; } = "";
+    public int SortOrder { get; set; }
 }
 
 public sealed class GalleryItemEntity

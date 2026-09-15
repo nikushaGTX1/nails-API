@@ -8,6 +8,7 @@ public sealed class SiteContentDto
     public List<ServiceDto> Services { get; set; } = [];
     public List<GalleryItemDto> Gallery { get; set; } = [];
     public List<LocationDto> Locations { get; set; } = [];
+    public List<CategoryDto> Categories { get; set; } = [];
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 
@@ -17,6 +18,16 @@ public sealed class ServiceDto
     public Dictionary<string, string> Name { get; set; } = [];
     public Dictionary<string, string> Description { get; set; } = [];
     public decimal Price { get; set; }
+    public string CategoryId { get; set; } = "";
+    public Dictionary<string, string> GroupLabel { get; set; } = [];
+    public Dictionary<string, string> SubgroupLabel { get; set; } = [];
+}
+
+public sealed class CategoryDto
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public Dictionary<string, string> Name { get; set; } = [];
+    public string ImageUrl { get; set; } = "";
 }
 
 public sealed class GalleryItemDto
