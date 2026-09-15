@@ -22,13 +22,15 @@ namespace nails_api.Data.Migrations
                 name: "GroupLabel",
                 table: "Services",
                 type: "jsonb",
-                nullable: false);
+                nullable: false,
+                defaultValueSql: "'{}'::jsonb");
 
             migrationBuilder.AddColumn<Dictionary<string, string>>(
                 name: "SubgroupLabel",
                 table: "Services",
                 type: "jsonb",
-                nullable: false);
+                nullable: false,
+                defaultValueSql: "'{}'::jsonb");
 
             migrationBuilder.CreateTable(
                 name: "Categories",
