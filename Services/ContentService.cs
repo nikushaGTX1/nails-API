@@ -22,9 +22,19 @@ public sealed class ContentService(NailsDbContext db) : IContentService
         };
     }
 
-    public async Task<SiteContentDto> PublishAsync(SiteContentDto content, CancellationToken cancellationToken = default)
+    public async Task<SiteContentDto> PublishAsync(SiteContentDto content, bool force = false, CancellationToken cancellationToken = default)
     {
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+        // FOR UPDATE takes a row lock held until commit/rollback, so a second concurrent Publish
+        // blocks here until this one finishes, then sees the fresh UpdatedAt — closing the race a
+        // plain read-then-write would leave open between two saves landing at nearly the same time.
+        var state = await db.SiteStates
+            .FromSqlRaw("SELECT * FROM \"SiteStates\" WHERE \"Id\" = 1 FOR UPDATE")
+            .SingleAsync(cancellationToken);
+        // UpdatedAt default(DateTimeOffset) means "no baseline sent" — nothing to conflict against.
+        if (!force && content.UpdatedAt != default && content.UpdatedAt != state.UpdatedAt)
+            throw new ContentConflictException(state.UpdatedAt);
+
         await db.SiteTexts.ExecuteDeleteAsync(cancellationToken);
         await db.SiteMedia.ExecuteDeleteAsync(cancellationToken);
         await db.SiteSettings.ExecuteDeleteAsync(cancellationToken);
@@ -40,7 +50,6 @@ public sealed class ContentService(NailsDbContext db) : IContentService
         db.GalleryItems.AddRange(content.Gallery.Select((x,i) => new GalleryItemEntity { Id=x.Id, Title=x.Title, Category=x.Category, ImageUrl=x.ImageUrl, Position=x.Position, SortOrder=i }));
         db.Locations.AddRange(content.Locations.Select((x,i) => new LocationEntity { Id=x.Id, Area=x.Area, Address=x.Address, Phone=x.Phone, Coordinates=x.Coordinates, SortOrder=i }));
         db.Categories.AddRange(content.Categories.Select((x,i) => new CategoryEntity { Id=x.Id, Name=x.Name, ImageUrl=x.ImageUrl, SortOrder=i }));
-        var state = await db.SiteStates.SingleAsync(x => x.Id == 1, cancellationToken);
         content.UpdatedAt = state.UpdatedAt = DateTimeOffset.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);

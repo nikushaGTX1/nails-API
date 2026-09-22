@@ -9,7 +9,11 @@ public sealed class SiteContentDto
     public List<GalleryItemDto> Gallery { get; set; } = [];
     public List<LocationDto> Locations { get; set; } = [];
     public List<CategoryDto> Categories { get; set; } = [];
-    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
+    /// <summary>
+    /// The UpdatedAt this client last loaded. Left at its default (unset) means "no baseline" —
+    /// PublishAsync then skips the conflict check, matching a fresh client that never loaded content.
+    /// </summary>
+    public DateTimeOffset UpdatedAt { get; set; }
 }
 
 public sealed class ServiceDto

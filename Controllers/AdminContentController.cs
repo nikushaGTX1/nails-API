@@ -9,9 +9,16 @@ public sealed class AdminContentController(IContentService contentService, Admin
 {
     [HttpPut]
     [RequestSizeLimit(110_000_000)]
-    public async Task<ActionResult<SiteContentDto>> Publish(SiteContentDto content, CancellationToken cancellationToken)
+    public async Task<ActionResult<SiteContentDto>> Publish(SiteContentDto content, [FromQuery] bool force, CancellationToken cancellationToken)
     {
         if (!sessions.IsValid(Request)) return Unauthorized();
-        return Ok(await contentService.PublishAsync(content,cancellationToken));
+        try
+        {
+            return Ok(await contentService.PublishAsync(content, force, cancellationToken));
+        }
+        catch (ContentConflictException ex)
+        {
+            return Conflict(new { message = ex.Message, latestUpdatedAt = ex.LatestUpdatedAt });
+        }
     }
 }
