@@ -22,6 +22,7 @@ public sealed class ServiceDto
     public Dictionary<string, string> Name { get; set; } = [];
     public Dictionary<string, string> Description { get; set; } = [];
     public decimal Price { get; set; }
+    public string ImageUrl { get; set; } = "";
     public string CategoryId { get; set; } = "";
     public Dictionary<string, string> GroupLabel { get; set; } = [];
     public Dictionary<string, string> SubgroupLabel { get; set; } = [];

@@ -16,6 +16,7 @@ public sealed class ServiceEntity
     public Dictionary<string, string> Name { get; set; } = [];
     public Dictionary<string, string> Description { get; set; } = [];
     public decimal Price { get; set; }
+    public string ImageUrl { get; set; } = "";
     public int SortOrder { get; set; }
     /// <summary>Empty = shown in the flat homepage service list. Set = grouped under a CategoryEntity's accordion page.</summary>
     public string CategoryId { get; set; } = "";
