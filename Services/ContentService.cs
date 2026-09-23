@@ -35,17 +35,42 @@ public sealed class ContentService(NailsDbContext db) : IContentService
         if (!force && content.UpdatedAt != default && content.UpdatedAt != state.UpdatedAt)
             throw new ContentConflictException(state.UpdatedAt);
 
-        await db.SiteTexts.ExecuteDeleteAsync(cancellationToken);
-        await db.SiteMedia.ExecuteDeleteAsync(cancellationToken);
-        await db.SiteSettings.ExecuteDeleteAsync(cancellationToken);
+        // SiteTexts/SiteMedia/SiteSettings are plain key -> value stores with no "remove" button
+        // anywhere in the admin UI — every key that has ever existed should simply keep whatever
+        // value it last had. Upserting (instead of delete-then-reinsert-what-this-payload-knows-
+        // about) means a browser tab running an OLDER build — one from before a key like a newly
+        // added translation string existed — can no longer wipe that key out just by publishing;
+        // it only touches the keys it actually sent.
+        var existingTexts = await db.SiteTexts.ToDictionaryAsync(x => (x.Language, x.Key), cancellationToken);
+        foreach (var language in content.Translations)
+            foreach (var item in language.Value)
+            {
+                var value = item.Value ?? "";
+                if (existingTexts.TryGetValue((language.Key, item.Key), out var row)) row.Value = value;
+                else db.SiteTexts.Add(new SiteText { Language = language.Key, Key = item.Key, Value = value });
+            }
+
+        var existingMedia = await db.SiteMedia.ToDictionaryAsync(x => x.Key, cancellationToken);
+        foreach (var (key, url) in content.Media)
+        {
+            if (existingMedia.TryGetValue(key, out var row)) row.Url = url ?? "";
+            else db.SiteMedia.Add(new SiteMedia { Key = key, Url = url ?? "" });
+        }
+
+        var existingSettings = await db.SiteSettings.ToDictionaryAsync(x => x.Key, cancellationToken);
+        foreach (var (key, value) in content.Settings)
+        {
+            if (existingSettings.TryGetValue(key, out var row)) row.Value = value ?? "";
+            else db.SiteSettings.Add(new SiteSetting { Key = key, Value = value ?? "" });
+        }
+
+        // Services/Gallery/Locations/Categories are ordered lists with an explicit Remove button in
+        // admin, so the payload's list IS the intended full list — replacing them wholesale is correct.
         await db.Services.ExecuteDeleteAsync(cancellationToken);
         await db.GalleryItems.ExecuteDeleteAsync(cancellationToken);
         await db.Locations.ExecuteDeleteAsync(cancellationToken);
         await db.Categories.ExecuteDeleteAsync(cancellationToken);
 
-        db.SiteTexts.AddRange(content.Translations.SelectMany(language => language.Value.Select(item => new SiteText { Language=language.Key, Key=item.Key, Value=item.Value ?? "" })));
-        db.SiteMedia.AddRange(content.Media.Select(x => new SiteMedia { Key=x.Key, Url=x.Value ?? "" }));
-        db.SiteSettings.AddRange(content.Settings.Select(x => new SiteSetting { Key=x.Key, Value=x.Value ?? "" }));
         db.Services.AddRange(content.Services.Select((x,i) => new ServiceEntity { Id=x.Id, Name=x.Name, Description=x.Description, Price=x.Price, SortOrder=i, CategoryId=x.CategoryId, GroupLabel=x.GroupLabel, SubgroupLabel=x.SubgroupLabel }));
         db.GalleryItems.AddRange(content.Gallery.Select((x,i) => new GalleryItemEntity { Id=x.Id, Title=x.Title, Category=x.Category, ImageUrl=x.ImageUrl, Position=x.Position, SortOrder=i }));
         db.Locations.AddRange(content.Locations.Select((x,i) => new LocationEntity { Id=x.Id, Area=x.Area, Address=x.Address, Phone=x.Phone, Coordinates=x.Coordinates, SortOrder=i }));
