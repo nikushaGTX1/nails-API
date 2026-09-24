@@ -21,7 +21,10 @@ public sealed class ServiceDto
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
     public Dictionary<string, string> Name { get; set; } = [];
     public Dictionary<string, string> Description { get; set; } = [];
-    public decimal Price { get; set; }
+    // Nullable: a blank "Price" input in admin sends JSON null, and a non-nullable decimal here
+    // would fail model binding for the WHOLE request with a generic "validation errors occurred"
+    // and no indication of which field or service caused it. Null just means "treat as 0" below.
+    public decimal? Price { get; set; }
     public string ImageUrl { get; set; } = "";
     public string CategoryId { get; set; } = "";
     public Dictionary<string, string> GroupLabel { get; set; } = [];

@@ -71,7 +71,7 @@ public sealed class ContentService(NailsDbContext db) : IContentService
         await db.Locations.ExecuteDeleteAsync(cancellationToken);
         await db.Categories.ExecuteDeleteAsync(cancellationToken);
 
-        db.Services.AddRange(content.Services.Select((x,i) => new ServiceEntity { Id=x.Id, Name=x.Name, Description=x.Description, Price=x.Price, ImageUrl=x.ImageUrl, SortOrder=i, CategoryId=x.CategoryId, GroupLabel=x.GroupLabel, SubgroupLabel=x.SubgroupLabel }));
+        db.Services.AddRange(content.Services.Select((x,i) => new ServiceEntity { Id=x.Id, Name=x.Name, Description=x.Description, Price=x.Price ?? 0, ImageUrl=x.ImageUrl, SortOrder=i, CategoryId=x.CategoryId, GroupLabel=x.GroupLabel, SubgroupLabel=x.SubgroupLabel }));
         db.GalleryItems.AddRange(content.Gallery.Select((x,i) => new GalleryItemEntity { Id=x.Id, Title=x.Title, Category=x.Category, ImageUrl=x.ImageUrl, Position=x.Position, SortOrder=i }));
         db.Locations.AddRange(content.Locations.Select((x,i) => new LocationEntity { Id=x.Id, Area=x.Area, Address=x.Address, Phone=x.Phone, Coordinates=x.Coordinates, SortOrder=i }));
         db.Categories.AddRange(content.Categories.Select((x,i) => new CategoryEntity { Id=x.Id, Name=x.Name, ImageUrl=x.ImageUrl, SortOrder=i }));
